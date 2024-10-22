@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const waitlistSchema = new mongoose.Schema({
   date: {
-    type: Date, // Using MongoDB Date format
+    type: String, // Using MongoDB Date format
     required: true,
   },
   name: {

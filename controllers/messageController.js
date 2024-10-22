@@ -1,13 +1,11 @@
 const Message = require("../models/messageModel");
+const { getCurrentTimeString } = require('../utils/dateUtils');
 
-// Convert string date to MongoDB date format
-
-// POST to send message
 exports.sendMessage = async (req, res) => {
   try {
     const { name, email, message } = req.body;
     const newMessage = new Message({
-      date: new Date(),
+      date: getCurrentTimeString(),
       name,
       email,
       message,

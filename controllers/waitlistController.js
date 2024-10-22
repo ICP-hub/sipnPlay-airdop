@@ -1,14 +1,12 @@
 const Waitlist = require("../models/waitlistModel");
+const { getCurrentTimeString } = require('../utils/dateUtils');
 
-// Convert string date to MongoDB date format
-
-// POST to send waitlist entry
 exports.sendWaitlist = async (req, res) => {
   try {
     const { name, email, icpAddress } = req.body;
 
     const newWaitlist = new Waitlist({
-      date: new Date(),
+      date:  getCurrentTimeString(),
       name,
       email,
       icpAddress,
