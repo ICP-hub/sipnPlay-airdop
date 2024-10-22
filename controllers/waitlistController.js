@@ -1,27 +1,23 @@
-const Waitlist = require('../models/waitlistModel');
+const Waitlist = require("../models/waitlistModel");
 
 // Convert string date to MongoDB date format
-const convertToMongoDate = (dateString) => {
-  return new Date(dateString);
-};
 
 // POST to send waitlist entry
 exports.sendWaitlist = async (req, res) => {
   try {
-    const { date, name, email, icpAddress } = req.body;
-    const mongoDate = convertToMongoDate(date);
+    const { name, email, icpAddress } = req.body;
 
     const newWaitlist = new Waitlist({
-      date: mongoDate,
+      date: new Date(),
       name,
       email,
       icpAddress,
     });
 
     await newWaitlist.save();
-    res.status(201).json({ message: 'Waitlist entry sent successfully' });
+    res.status(201).json({ message: "Waitlist entry sent successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -29,8 +25,8 @@ exports.sendWaitlist = async (req, res) => {
 exports.getWaitlist = async (req, res) => {
   try {
     const waitlistEntries = await Waitlist.find();
-    res.status(200).json(waitlistEntries);
+    res.status(200).json({ data: waitlistEntries });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };

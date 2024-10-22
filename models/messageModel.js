@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
   date: {
-    type: Date, // Using MongoDB Date format
+    type: Date,
     required: true,
   },
   name: {
@@ -19,4 +19,4 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model("Message", messageSchema);
