@@ -1,4 +1,30 @@
-/node_modules
-npm-debug.log
+# Various IDEs and Editors
+.vscode/
+.idea/
+**/*~
+
+# Mac OSX temporary files
 .DS_Store
-/*.env
+**/.DS_Store
+
+# dfx temporary files
+.dfx/
+canister_ids.json
+
+# generated files
+**/declarations/
+
+# rust
+target/
+Cargo.lock
+
+# frontend code
+node_modules/
+dist/
+.svelte-kit/
+
+# environment variables
+.env
+gitm.toml
+*.csv
+allocations.json

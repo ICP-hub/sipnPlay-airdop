@@ -1,0 +1,23 @@
+{
+  "canisters": {
+    "airdrop_canister": {
+      "build": "sh build.sh",
+      "candid": "airdrop_canister/candid.did",
+      "wasm": "target/wasm32-unknown-unknown/release/airdrop_canister.wasm",
+      "type": "custom",
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

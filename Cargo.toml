@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "airdrop_canister"
+]
+resolver = "2"
