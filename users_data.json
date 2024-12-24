@@ -1,0 +1,10 @@
+[
+    {
+      "Principal": "user-principal-1",
+      "Amount": 100
+    },
+    {
+      "Principal": "user-principal-2",
+      "Amount": 200
+    }
+  ]

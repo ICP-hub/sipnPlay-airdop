@@ -94,7 +94,3 @@ The canister exposes the following query methods:
     ```sh
     dfx canister call --ic airdrop_canister get_shares_list '(OFFSET)'
     ```
-
-## Acknowledgments
-
-This canister was developed for the ICP CC DAO to simplify the process of conducting token airdrops to multiple users efficiently and accurately. It can be used by any organization or individual needing to perform airdrops based on a predefined dataset.
