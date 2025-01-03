@@ -1,6 +1,6 @@
 use candid::{Nat, Principal};
 use ic_exports::{ic_cdk::{api::is_controller, call}, ic_kit::CallResult};
-use icrc_ledger_types::icrc1::{account::Account, transfer::{TransferArg, TransferError}};
+use icrc_ledger_types::icrc1::{account::Account, transfer::{TransferArg,TransferError}};
 
 use crate::{state::get_token_pid, types::AirdropError};
 
@@ -48,14 +48,13 @@ pub async fn transfer_tokens(receiver_pid: String, amount: Nat) -> Result<(), Ai
     not_anonymous(&token_canister)?;
 
     let transfer_args = TransferArg {
-        to: receiver_pid,
-        fee: 0,
+        to: receiver_pid.parse().unwrap(),
+        fee: Some(Nat::from(0u64)),
         memo: None,
         from_subaccount: None,
         created_at_time: None,
-        amount,
+        amount: Nat::from(amount),
     };
-
     let call_response = call(token_canister, "send_dfx", (transfer_args, )).await;
 
     match handle_intercanister_call::<Result<Nat, TransferError>>(call_response)? {

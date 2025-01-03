@@ -29,18 +29,18 @@ impl Airdrop {
     }
 
     #[update]
-    pub fn add_share_allocations(&self, allocations: Vec<(Principal, Nat)>) -> Result<(), AirdropError> {
+    pub fn add_share_allocations(&self, allocations: Vec<(String, Nat)>) -> Result<(), AirdropError> {
         only_controller(caller())?;
 
         allocations.iter().for_each(|allocation| {
-            add_share_allocation(allocation.0, allocation.1.clone());
+            add_share_allocation(allocation.0.clone(), allocation.1.clone());
         });
 
         Ok(())
     }
 
     #[update]
-    pub fn reset(&self,) -> Result<(), AirdropError> {
+    pub fn reset_all(&self) -> Result<(), AirdropError> {
         only_controller(caller())?;
 
         clear_all();
@@ -49,7 +49,7 @@ impl Airdrop {
     }
 
     #[update]
-    pub async fn distribute(&self) -> Result<(), AirdropError> {
+    pub async fn distribute_tokens(&self) -> Result<(), AirdropError> {
         only_controller(caller())?;
 
         let total_tokens = token_balance(id()).await?;
@@ -73,8 +73,9 @@ impl Airdrop {
         for (user, share) in share_allocations {
             let tokens = token_per_share.clone() * share;
             let mut tries = 0;
+            let user_clone = user.clone();
             loop {
-                let transfer_result = transfer_tokens(user, tokens.clone()).await;
+                let transfer_result = transfer_tokens(user_clone.clone(), tokens.clone()).await;
 
                 if transfer_result.is_ok() {
                     SHARE_ALLOCATIONS.with(|allocations| allocations.borrow_mut().remove(&user));
@@ -92,17 +93,17 @@ impl Airdrop {
     }
 
     #[query]
-    pub fn get_user_share_allocation(&self, user: Principal) -> Option<Nat> {
+    pub fn get_user_share_allocation(&self, user: String) -> Option<Nat> {
         get_user_shares(user)
     }
 
     #[query]
-    pub fn get_user_token_allocation(&self, user: Principal) -> Option<Nat> {
+    pub fn get_user_token_allocation(&self, user: String) -> Option<Nat> {
         get_user_tokens(user)
     }
 
     #[query]
-    pub fn get_shares_list(&self, start_index: u64) -> Vec<(Principal, Nat)> {
+    pub fn get_shares_list(&self, start_index: u64) -> Vec<(String, Nat)> {
         let allocations = get_all_share_allocations();
         let start_index = start_index as usize;
         let end_index = usize::min(start_index + 100, allocations.len());
@@ -115,7 +116,7 @@ impl Airdrop {
     }
 
     #[query]
-    pub fn get_tokens_list(&self, start_index: u64) -> Vec<(Principal, Nat)> {
+    pub fn get_tokens_list(&self, start_index: u64) -> Vec<(String, Nat)> {
         let allocations = get_all_token_allocations();
         let start_index = start_index as usize;
         let end_index = usize::min(start_index + 100, allocations.len());
