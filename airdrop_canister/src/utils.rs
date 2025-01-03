@@ -12,24 +12,51 @@ pub fn only_controller(caller: Principal) -> Result<(), AirdropError> {
     Ok(())
 }
 
+// /// Transfers `amount` tokens to `receiver_pid`
+// pub async fn transfer_tokens(receiver_pid: Principal, amount: Nat) -> Result<(), AirdropError> {
+//     let token_canister = get_token_pid();
+//     not_anonymous(&token_canister)?;
+
+//     let transfer_args = TransferArg {
+//         from_subaccount: None,
+//         to: Account {
+//             owner: receiver_pid,
+//             subaccount: None,
+//         },
+//         fee: None,
+//         created_at_time: None,
+//         memo: None,
+//         amount,
+//     };
+
+//     let call_response = call(token_canister, "icrc1_transfer", (transfer_args, )).await;
+
+//     match handle_intercanister_call::<Result<Nat, TransferError>>(call_response)? {
+//         Err(err) => Err(AirdropError::TokenCanisterError(format!(
+//             "Error occured on token transfer: {:#?}",
+//             err
+//         ))),
+//         _ => Ok(()),
+//     }?;
+
+//     Ok(())
+// }
+
 /// Transfers `amount` tokens to `receiver_pid`
-pub async fn transfer_tokens(receiver_pid: Principal, amount: Nat) -> Result<(), AirdropError> {
+pub async fn transfer_tokens(receiver_pid: String, amount: Nat) -> Result<(), AirdropError> {
     let token_canister = get_token_pid();
     not_anonymous(&token_canister)?;
 
     let transfer_args = TransferArg {
-        from_subaccount: None,
-        to: Account {
-            owner: receiver_pid,
-            subaccount: None,
-        },
-        fee: None,
-        created_at_time: None,
+        to: receiver_pid,
+        fee: 0,
         memo: None,
+        from_subaccount: None,
+        created_at_time: None,
         amount,
     };
 
-    let call_response = call(token_canister, "icrc1_transfer", (transfer_args, )).await;
+    let call_response = call(token_canister, "send_dfx", (transfer_args, )).await;
 
     match handle_intercanister_call::<Result<Nat, TransferError>>(call_response)? {
         Err(err) => Err(AirdropError::TokenCanisterError(format!(

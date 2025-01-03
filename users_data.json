@@ -1,10 +1,10 @@
 [
-    {
-      "Principal": "n5ytn-hebsc-fbio3-ll5ed-ermti-6kvdk-sjp4d-pofnb-66xhd-gpj4t-3qe",
-      "Amount": 100
-    },
-    {
-      "Principal":"4hsxq-rcsvl-rw2wr-5i5ha-gttgh-ekyeu-wsawq-2tuib-2hyul-7hpzc-zqe",
-      "Amount": 100
-    }
-  ]
+  {
+    "Principal": "5099f7da7cf6c056d37dcecc31b082a8a81acb381eabb698a9b77dd6b1af1f28",
+    "Amount": 2
+  },
+  {
+    "Principal": "7d0b14cacdeb10e231bb33635c179b819d890fd134d3cc3f8f5d0885efa71ebe",
+    "Amount": 1
+  }
+]
