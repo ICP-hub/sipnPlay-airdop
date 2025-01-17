@@ -9,6 +9,8 @@ use ic_exports::{
     candid::{Nat, Principal},
     ic_cdk::{caller, id},
 };
+use std::convert::TryInto;
+use num_traits::ToPrimitive;
 
 #[derive(Canister)]
 pub struct Airdrop {
@@ -60,18 +62,28 @@ impl Airdrop {
             return Err(AirdropError::EmptyAllocationList);
         }
 
-        let mut shares_sum: Nat = Nat::from(0 as u32);
+        let mut shares_sum: u64 = 0u64;
 
         share_allocations
             .iter()
-            .for_each(|(_, share)| shares_sum += share.clone());
+            .for_each(|(_, share)| {
+                if let Some(share_u64) = share.0.to_u64() {
+                    shares_sum += share_u64;
+                } else {
+                    // Handle cases where the value cannot be converted
+                    panic!("Share value exceeds u64 range");
+                }
+            });
 
         let fee = token_fee().await?;
-        let total_fee = share_allocations.len() * fee;
+        let total_fee = (share_allocations.len() as u64) * fee;
         let token_per_share = (total_tokens - total_fee) / shares_sum;
 
         for (user, share) in share_allocations {
-            let tokens = token_per_share.clone() * share;
+            let tokens: u64 = match (token_per_share.to_u64(), share.0.to_u64()) {
+                (Some(tps_u64), Some(share_u64)) => tps_u64 * share_u64,
+                _ => panic!("Failed to convert Nat to u64"),
+            };
             let mut tries = 0;
             let user_clone = user.clone();
             loop {
@@ -79,7 +91,7 @@ impl Airdrop {
 
                 if transfer_result.is_ok() {
                     SHARE_ALLOCATIONS.with(|allocations| allocations.borrow_mut().remove(&user));
-                    add_token_allocation(user, tokens);
+                    add_token_allocation(user, tokens.into());
                     break;
                 } else if tries > 2 {
                     return transfer_result;

@@ -1,8 +1,32 @@
-use candid::{Nat, Principal};
+use candid::{CandidType, Nat, Principal};
 use ic_exports::{ic_cdk::{api::is_controller, call}, ic_kit::CallResult};
-use icrc_ledger_types::icrc1::{account::Account, transfer::{TransferArg,TransferError}};
+use icrc_ledger_types::icrc1::{account::Account, transfer::{Memo, TransferArg, TransferError}};
+use serde::{Deserialize, Serialize};
+use serde_bytes::ByteBuf;
 
 use crate::{state::get_token_pid, types::AirdropError};
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub struct Tokens {
+     e8s : u64,
+}
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub struct TimeStamp{
+    timestamp_nanos: u64
+}
+
+type TextAccountIdentifier = String;
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub struct SendArgs{
+    memo: Memo,
+    amount: Tokens,
+    fee: Tokens,
+    from_subaccount: Option<Account>,
+    to: TextAccountIdentifier,
+    created_at_time: Option<TimeStamp>,
+}
 
 /// Returns error if `caller` is not a controller of the canister
 pub fn only_controller(caller: Principal) -> Result<(), AirdropError> {
@@ -43,19 +67,27 @@ pub fn only_controller(caller: Principal) -> Result<(), AirdropError> {
 // }
 
 /// Transfers `amount` tokens to `receiver_pid`
-pub async fn transfer_tokens(receiver_pid: String, amount: Nat) -> Result<(), AirdropError> {
+pub async fn transfer_tokens(receiver_pid: String, amount: u64) -> Result<(), AirdropError> {
     let token_canister = get_token_pid();
     not_anonymous(&token_canister)?;
 
-    let transfer_args = TransferArg {
-        to: receiver_pid.parse().unwrap(),
-        fee: Some(Nat::from(0u64)),
-        memo: None,
-        from_subaccount: None,
-        created_at_time: None,
-        amount: Nat::from(amount),
+    let send_args = SendArgs {
+        memo: 0.into(), // `memo` as `nat64`.
+        amount: Tokens {
+            e8s: amount, // `e8s` as `nat64`.
+        },
+        fee: Tokens {
+            e8s: 0, // Convert integer to Nat.
+        },
+        from_subaccount: None, // Replace `None` if a specific subaccount is required.
+        to: receiver_pid, // This should be a `TextAccountIdentifier` (String).
+        created_at_time: Some(TimeStamp {
+            timestamp_nanos: 0, // Convert integer to Nat.
+        }),
+
     };
-    let call_response = call(token_canister, "send_dfx", (transfer_args, )).await;
+
+    let call_response = call(token_canister, "send_dfx", (send_args, )).await;
 
     match handle_intercanister_call::<Result<Nat, TransferError>>(call_response)? {
         Err(err) => Err(AirdropError::TokenCanisterError(format!(
@@ -69,19 +101,19 @@ pub async fn transfer_tokens(receiver_pid: String, amount: Nat) -> Result<(), Ai
 }
 
 /// Returns the token's transfer fee
-pub async fn token_fee() -> Result<Nat, AirdropError> {
+pub async fn token_fee() -> Result<u64, AirdropError> {
     let token_canister = get_token_pid();
     not_anonymous(&token_canister)?;
 
     let call_response = call(token_canister, "icrc1_fee", ()).await;
 
-    let fee = handle_intercanister_call::<Nat>(call_response)?;
+    let fee = handle_intercanister_call::<u64>(call_response)?;
 
     Ok(fee)
 }
 
 /// Returns `user`'s token balance
-pub async fn token_balance(user: Principal) -> Result<Nat, AirdropError> {
+pub async fn token_balance(user: Principal) -> Result<u64, AirdropError> {
     let token_canister = get_token_pid();
     not_anonymous(&token_canister)?;
 
@@ -92,7 +124,7 @@ pub async fn token_balance(user: Principal) -> Result<Nat, AirdropError> {
 
     let call_response = call(token_canister, "icrc1_balance_of", (account,)).await;
 
-    let fee = handle_intercanister_call::<Nat>(call_response)?;
+    let fee = handle_intercanister_call::<u64>(call_response)?;
 
     Ok(fee)
 }
